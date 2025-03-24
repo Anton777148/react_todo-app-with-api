@@ -3,6 +3,7 @@ import classNames from 'classnames';
 import { Todo } from '../types/Todo';
 import { deleteTodo, updateTodo } from '../api/todos';
 import { useEffect, useRef, useState } from 'react';
+import { ErrorType } from '../types/ErrorType';
 
 type Props = {
   todo: Todo;
@@ -44,7 +45,7 @@ export const TodoItem: React.FC<Props> = ({
   const handleSaveTitle = () => {
     setLoadingTodo(true);
     if (editedTitle.trim().length === 0) {
-      setErrorMessage('Title should not be empty');
+      setErrorMessage(ErrorType.NoTitle);
       setLoadingTodo(false);
 
       return;
@@ -56,12 +57,10 @@ export const TodoItem: React.FC<Props> = ({
 
         setIsEditing(false);
 
-        setTimeout(() => {
-          setLoadingTodo(false);
-        }, 1000);
+        setLoadingTodo(false);
       })
       .catch(() => {
-        setErrorMessage('Unable to update todo');
+        setErrorMessage(ErrorType.UpdateTodo);
       });
   };
 
@@ -78,33 +77,32 @@ export const TodoItem: React.FC<Props> = ({
       .then(() => {
         const filtered = allTodos.filter(todoItem => todoItem.id !== todoId);
 
-        setTimeout(() => {
-          setAllTodos([...filtered]);
-          setLoadingTodo(false);
-          setLoadingTodoId(-1);
-        }, 1000);
+        setAllTodos([...filtered]);
+        setLoadingTodo(false);
+        setLoadingTodoId(-1);
       })
-      .catch(() => setErrorMessage(`Unable to delete a todo`));
+      .catch(() => setErrorMessage(ErrorType.DeleteTodo));
   };
 
   const handleToggleTodo = () => {
     setLoadingTodo(true);
+    setLoadingTodoId(id);
     const newCompleted = !completed;
 
     updateTodo(id, { completed: newCompleted })
       .then(() => {
-        setTimeout(() => {
-          setAllTodos(
-            allTodos.map(t =>
-              t.id === id ? { ...t, completed: newCompleted } : t,
-            ),
-          );
-          setLoadingTodo(false);
-        }, 1000);
+        setAllTodos(
+          allTodos.map(t =>
+            t.id === id ? { ...t, completed: newCompleted } : t,
+          ),
+        );
+        setLoadingTodo(false);
+        setLoadingTodoId(-1);
       })
       .catch(() => {
-        setErrorMessage('Unable to update todo status');
+        setErrorMessage(ErrorType.UpdateTodo);
         setLoadingTodo(false);
+        setLoadingTodoId(-1);
       });
   };
 

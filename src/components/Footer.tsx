@@ -3,6 +3,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { Todo } from '../types/Todo';
 import { FilterType } from '../types/FilterType';
 import { deleteTodo } from '../api/todos';
+import { ErrorType } from '../types/ErrorType';
 
 type Props = {
   selectedLink: FilterType;
@@ -60,7 +61,7 @@ export const Footer: React.FC<Props> = ({
 
         setAllTodos(updatedTodos);
         if (failedIds.length > 0) {
-          setErrorMessage('Unable to delete a todo');
+          setErrorMessage(ErrorType.DeleteTodo);
         }
       },
     );
@@ -75,12 +76,14 @@ export const Footer: React.FC<Props> = ({
       <nav className="filter" data-cy="Filter">
         {Object.values(FilterType).map(type => (
           <a
-            href="#/"
+            href="#"
             key={type}
             className={classNames('filter__link', {
               selected: selectedLink === type,
             })}
-            data-cy={type === 'All' ? 'FilterLinkAll' : `FilterLink${type}`}
+            data-cy={
+              type === FilterType.All ? 'FilterLinkAll' : `FilterLink${type}`
+            }
             onClick={() => setSelectedLink(type)}
           >
             {type}
