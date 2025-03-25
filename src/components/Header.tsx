@@ -74,15 +74,20 @@ export const Header: React.FC<Props> = ({
     setLoadingTodo(true);
 
     const allCompleted = allTodos.every(todo => todo.completed);
-    const updatedTodos = allTodos.map(todo => ({
-      ...todo,
-      completed: !allCompleted,
-    }));
+
+    const todosToUpdate = allTodos.filter(
+      todo => todo.completed === allCompleted,
+    );
+    const updatedTodos = allTodos.map(todo =>
+      todosToUpdate.includes(todo)
+        ? { ...todo, completed: !allCompleted }
+        : todo,
+    );
 
     try {
       await Promise.all(
-        updatedTodos.map(todo =>
-          updateTodo(todo.id, { completed: todo.completed }),
+        todosToUpdate.map(todo =>
+          updateTodo(todo.id, { completed: !allCompleted }),
         ),
       );
 

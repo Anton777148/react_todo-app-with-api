@@ -31,7 +31,10 @@ export const TodoItem: React.FC<Props> = ({
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    console.log('isEditing updated:', isEditing);
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus(); // Фокусуємо інпут при відкритті форми редагування
+      inputRef.current.select(); // Виділяємо текст для зручності редагування
+    }
   }, [isEditing]);
 
   const handleDoubleClick = () => {
