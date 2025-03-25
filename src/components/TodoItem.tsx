@@ -32,8 +32,8 @@ export const TodoItem: React.FC<Props> = ({
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
-      inputRef.current.focus(); // Фокусуємо інпут при відкритті форми редагування
-      inputRef.current.select(); // Виділяємо текст для зручності редагування
+      inputRef.current.focus();
+      inputRef.current.select();
     }
   }, [isEditing]);
 
