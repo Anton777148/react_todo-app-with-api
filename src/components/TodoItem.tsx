@@ -14,6 +14,7 @@ type Props = {
   setLoadingTodo: (arg: boolean) => void;
   loadingTodoId: number;
   setLoadingTodoId: (arg: number) => void;
+  loadingForToggleAll: number[];
 };
 
 export const TodoItem: React.FC<Props> = ({
@@ -25,7 +26,10 @@ export const TodoItem: React.FC<Props> = ({
   setLoadingTodo,
   loadingTodoId,
   setLoadingTodoId,
+  loadingForToggleAll,
 }) => {
+  console.log({ loadingTodo, loadingTodoId, loadingForToggleAll });
+
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(title);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -59,12 +63,11 @@ export const TodoItem: React.FC<Props> = ({
         setAllTodos(allTodos.map(t => (t.id === id ? updatedTodo : t)));
 
         setIsEditing(false);
-
-        setLoadingTodo(false);
       })
       .catch(() => {
         setErrorMessage(ErrorType.UpdateTodo);
-      });
+      })
+      .finally(() => setLoadingTodo(false));
   };
 
   const handleCancelEdit = () => {
@@ -78,13 +81,15 @@ export const TodoItem: React.FC<Props> = ({
 
     deleteTodo(todoId)
       .then(() => {
-        const filtered = allTodos.filter(todoItem => todoItem.id !== todoId);
-
-        setAllTodos([...filtered]);
+        setAllTodos(allTodos.filter(todoItem => todoItem.id !== todoId));
+      })
+      .catch(() => {
+        setErrorMessage(ErrorType.DeleteTodo);
+      })
+      .finally(() => {
         setLoadingTodo(false);
         setLoadingTodoId(-1);
-      })
-      .catch(() => setErrorMessage(ErrorType.DeleteTodo));
+      });
   };
 
   const handleToggleTodo = () => {
@@ -99,11 +104,11 @@ export const TodoItem: React.FC<Props> = ({
             t.id === id ? { ...t, completed: newCompleted } : t,
           ),
         );
-        setLoadingTodo(false);
-        setLoadingTodoId(-1);
       })
       .catch(() => {
         setErrorMessage(ErrorType.UpdateTodo);
+      })
+      .finally(() => {
         setLoadingTodo(false);
         setLoadingTodoId(-1);
       });
@@ -154,20 +159,24 @@ export const TodoItem: React.FC<Props> = ({
         </span>
       )}
 
-      <button
-        type="button"
-        className="todo__remove"
-        data-cy="TodoDelete"
-        onClick={() => handleDeleteButton(id)}
-        disabled={isEditing}
-      >
-        ×
-      </button>
+      {!isEditing && (
+        <button
+          type="button"
+          className="todo__remove"
+          data-cy="TodoDelete"
+          onClick={() => handleDeleteButton(id)}
+        >
+          ×
+        </button>
+      )}
 
       <div
+        key={loadingTodo.toString()}
         data-cy="TodoLoader"
         className={classNames('modal overlay', {
-          'is-active': loadingTodo && id === loadingTodoId,
+          'is-active':
+            (loadingTodo && id === loadingTodoId) ||
+            loadingForToggleAll.includes(id),
         })}
       >
         <div className="modal-background has-background-white-ter" />

@@ -10,6 +10,7 @@ type Props = {
   allTodos: Todo[];
   setLoadingTodo: (arg: boolean) => void;
   setLoadingTodoId: (arg: number) => void;
+  setLoadingForToggleAll: (arg: number[]) => void;
 };
 
 export const Header: React.FC<Props> = ({
@@ -18,6 +19,7 @@ export const Header: React.FC<Props> = ({
   allTodos,
   setLoadingTodo,
   setLoadingTodoId,
+  setLoadingForToggleAll,
 }) => {
   const [inputValue, setInputValue] = useState('');
   const [disabled, setDisabled] = useState(false);
@@ -84,6 +86,8 @@ export const Header: React.FC<Props> = ({
         : todo,
     );
 
+    setLoadingForToggleAll(todosToUpdate.map(todo => todo.id));
+
     try {
       await Promise.all(
         todosToUpdate.map(todo =>
@@ -96,6 +100,9 @@ export const Header: React.FC<Props> = ({
     } catch (error) {
       setErrorMessage('Unable to toggle all todos');
       setLoadingTodo(false);
+    } finally {
+      setLoadingTodo(false);
+      setLoadingForToggleAll([]);
     }
   };
 

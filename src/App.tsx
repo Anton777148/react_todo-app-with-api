@@ -17,6 +17,7 @@ export const App: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [loadingTodo, setLoadingTodo] = useState(false);
   const [loadingTodoId, setLoadingTodoId] = useState<number>(-1);
+  const [loadingForToggleAll, setLoadingForToggleAll] = useState<number[]>([]);
 
   useEffect(() => {
     getTodos()
@@ -63,6 +64,7 @@ export const App: React.FC = () => {
           allTodos={allTodos}
           setLoadingTodo={setLoadingTodo}
           setLoadingTodoId={setLoadingTodoId}
+          setLoadingForToggleAll={setLoadingForToggleAll}
         />
         <TodoList
           todos={filteredTodos}
@@ -73,6 +75,7 @@ export const App: React.FC = () => {
           setLoadingTodo={setLoadingTodo}
           loadingTodoId={loadingTodoId}
           setLoadingTodoId={setLoadingTodoId}
+          loadingForToggleAll={loadingForToggleAll}
         />
         {allTodos.length > 0 && (
           <Footer

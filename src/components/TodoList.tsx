@@ -11,6 +11,7 @@ type Props = {
   setLoadingTodo: (arg: boolean) => void;
   loadingTodoId: number;
   setLoadingTodoId: (arg: number) => void;
+  loadingForToggleAll: number[];
 };
 
 export const TodoList: React.FC<Props> = ({
@@ -22,6 +23,7 @@ export const TodoList: React.FC<Props> = ({
   setLoadingTodo,
   loadingTodoId,
   setLoadingTodoId,
+  loadingForToggleAll,
 }) => {
   return (
     <section className="todoapp__main" data-cy="TodoList">
@@ -36,6 +38,7 @@ export const TodoList: React.FC<Props> = ({
           setLoadingTodo={setLoadingTodo}
           loadingTodoId={loadingTodoId}
           setLoadingTodoId={setLoadingTodoId}
+          loadingForToggleAll={loadingForToggleAll}
         />
       ))}
     </section>
