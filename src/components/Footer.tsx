@@ -9,10 +9,11 @@ type Props = {
   selectedLink: FilterType;
   setSelectedLink: (arg: FilterType) => void;
   todos: Todo[];
-  setAllTodos: (arg: Todo[]) => void;
+  setAllTodos: React.Dispatch<React.SetStateAction<Todo[]>>;
   setErrorMessage: (arg: string) => void;
   allTodos: Todo[];
   isSubmitting: boolean;
+  setLoadingTodo: (arg: boolean) => void;
 };
 
 export const Footer: React.FC<Props> = ({
@@ -23,6 +24,7 @@ export const Footer: React.FC<Props> = ({
   setErrorMessage,
   allTodos,
   isSubmitting,
+  setLoadingTodo,
 }) => {
   const [remainingTodosCount, setRemainingTodosCount] = useState(0);
 
@@ -41,30 +43,36 @@ export const Footer: React.FC<Props> = ({
     }
   }, [selectedLink, newCount, remainingTodosCount, isSubmitting]);
 
-  const handleClearCompleted = () => {
+  const handleClearCompleted = async () => {
+    setLoadingTodo(true);
+
     const allCompletedTodos = todos.filter(todo => todo.completed);
 
-    Promise.allSettled(allCompletedTodos.map(todo => deleteTodo(todo.id))).then(
-      results => {
-        const failedIds = results
-          .map((result, index) =>
-            result.status === 'rejected' ? allCompletedTodos[index].id : null,
-          )
-          .filter((id): id is number => id !== null);
-        const successfullyDeletedIds = allCompletedTodos
-          .map(todo => todo.id)
-          .filter(id => !failedIds.includes(id));
-
-        const updatedTodos = todos.filter(
-          todo => !successfullyDeletedIds.includes(todo.id),
-        );
-
-        setAllTodos(updatedTodos);
-        if (failedIds.length > 0) {
-          setErrorMessage(ErrorType.DeleteTodo);
-        }
-      },
+    const results = await Promise.allSettled(
+      allCompletedTodos.map(todo => deleteTodo(todo.id)),
     );
+
+    const failedIds = results.reduce<number[]>((acc, result, index) => {
+      if (result.status === 'rejected') {
+        acc.push(allCompletedTodos[index].id);
+      }
+
+      return acc;
+    }, []);
+
+    const successfullyDeletedIds = allCompletedTodos
+      .map(todo => todo.id)
+      .filter(id => !failedIds.includes(id));
+
+    setAllTodos(prevTodos =>
+      prevTodos.filter(todo => !successfullyDeletedIds.includes(todo.id)),
+    );
+
+    if (failedIds.length > 0) {
+      setErrorMessage(ErrorType.DeleteTodo);
+    }
+
+    setLoadingTodo(false);
   };
 
   return (

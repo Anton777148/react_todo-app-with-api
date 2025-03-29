@@ -79,6 +79,7 @@ export const App: React.FC = () => {
         />
         {allTodos.length > 0 && (
           <Footer
+            setLoadingTodo={setLoadingTodo}
             selectedLink={selectedLink}
             setSelectedLink={setSelectedLink}
             todos={filteredTodos}

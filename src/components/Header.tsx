@@ -76,30 +76,32 @@ export const Header: React.FC<Props> = ({
     setLoadingTodo(true);
 
     const allCompleted = allTodos.every(todo => todo.completed);
-
     const todosToUpdate = allTodos.filter(
       todo => todo.completed === allCompleted,
     );
-    const updatedTodos = allTodos.map(todo =>
-      todosToUpdate.includes(todo)
-        ? { ...todo, completed: !allCompleted }
-        : todo,
-    );
+    const todoIdsToUpdate = todosToUpdate.map(todo => todo.id);
 
-    setLoadingForToggleAll(todosToUpdate.map(todo => todo.id));
+    setLoadingForToggleAll(todoIdsToUpdate);
 
     try {
-      await Promise.all(
+      const updatedTodos = await Promise.all(
         todosToUpdate.map(todo =>
-          updateTodo(todo.id, { completed: !allCompleted }),
+          updateTodo(todo.id, { completed: !allCompleted }).then(() => ({
+            ...todo,
+            completed: !allCompleted,
+          })),
         ),
       );
 
-      setAllTodos(updatedTodos);
-      setLoadingTodo(false);
+      setAllTodos(
+        allTodos.map(todo =>
+          todoIdsToUpdate.includes(todo.id)
+            ? updatedTodos.find(updated => updated.id === todo.id) || todo
+            : todo,
+        ),
+      );
     } catch (error) {
       setErrorMessage('Unable to toggle all todos');
-      setLoadingTodo(false);
     } finally {
       setLoadingTodo(false);
       setLoadingForToggleAll([]);

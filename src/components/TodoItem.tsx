@@ -28,8 +28,6 @@ export const TodoItem: React.FC<Props> = ({
   setLoadingTodoId,
   loadingForToggleAll,
 }) => {
-  console.log({ loadingTodo, loadingTodoId, loadingForToggleAll });
-
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(title);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -92,26 +90,27 @@ export const TodoItem: React.FC<Props> = ({
       });
   };
 
-  const handleToggleTodo = () => {
+  const handleToggleTodo = async () => {
     setLoadingTodo(true);
     setLoadingTodoId(id);
     const newCompleted = !completed;
 
-    updateTodo(id, { completed: newCompleted })
-      .then(() => {
-        setAllTodos(
-          allTodos.map(t =>
-            t.id === id ? { ...t, completed: newCompleted } : t,
-          ),
-        );
-      })
-      .catch(() => {
-        setErrorMessage(ErrorType.UpdateTodo);
-      })
-      .finally(() => {
-        setLoadingTodo(false);
-        setLoadingTodoId(-1);
+    try {
+      await updateTodo(id, {
+        completed: newCompleted,
       });
+
+      setAllTodos(
+        allTodos.map(t =>
+          t.id === id ? { ...t, completed: newCompleted } : t,
+        ),
+      );
+    } catch (error) {
+      setErrorMessage(ErrorType.UpdateTodo);
+    } finally {
+      setLoadingTodo(false);
+      setLoadingTodoId(-1);
+    }
   };
 
   return (
@@ -171,7 +170,6 @@ export const TodoItem: React.FC<Props> = ({
       )}
 
       <div
-        key={loadingTodo.toString()}
         data-cy="TodoLoader"
         className={classNames('modal overlay', {
           'is-active':
