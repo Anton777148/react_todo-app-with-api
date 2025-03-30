@@ -47,32 +47,6 @@ export const TodoItem: React.FC<Props> = ({
     setEditedTitle(e.target.value);
   };
 
-  const handleSaveTitle = () => {
-    setLoadingTodo(true);
-    if (editedTitle.trim().length === 0) {
-      setErrorMessage(ErrorType.NoTitle);
-      setLoadingTodo(false);
-
-      return;
-    }
-
-    updateTodo(id, { title: editedTitle })
-      .then((updatedTodo: Todo) => {
-        setAllTodos(allTodos.map(t => (t.id === id ? updatedTodo : t)));
-
-        setIsEditing(false);
-      })
-      .catch(() => {
-        setErrorMessage(ErrorType.UpdateTodo);
-      })
-      .finally(() => setLoadingTodo(false));
-  };
-
-  const handleCancelEdit = () => {
-    setIsEditing(false);
-    setEditedTitle(title);
-  };
-
   const handleDeleteButton = (todoId: number) => {
     setLoadingTodo(true);
     setLoadingTodoId(todoId);
@@ -88,6 +62,47 @@ export const TodoItem: React.FC<Props> = ({
         setLoadingTodo(false);
         setLoadingTodoId(-1);
       });
+  };
+
+  const handleSaveTitle = () => {
+    const trimmedTitle = editedTitle.trim();
+
+    if (trimmedTitle.length === 0) {
+      handleDeleteButton(id);
+
+      return;
+    }
+
+    if (trimmedTitle === title.trim()) {
+      setIsEditing(false);
+
+      return;
+    }
+
+    setLoadingTodo(true);
+    setLoadingTodoId(id);
+    if (editedTitle.trim().length === 0) {
+      setErrorMessage(ErrorType.NoTitle);
+      setLoadingTodo(false);
+
+      return;
+    }
+
+    updateTodo(id, { title: trimmedTitle })
+      .then((updatedTodo: Todo) => {
+        setAllTodos(allTodos.map(t => (t.id === id ? updatedTodo : t)));
+
+        setIsEditing(false);
+      })
+      .catch(() => {
+        setErrorMessage(ErrorType.UpdateTodo);
+      })
+      .finally(() => setLoadingTodo(false));
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditedTitle(title);
   };
 
   const handleToggleTodo = async () => {
@@ -154,7 +169,7 @@ export const TodoItem: React.FC<Props> = ({
           className="todo__title"
           onDoubleClick={handleDoubleClick}
         >
-          {title}
+          {title.trim()}
         </span>
       )}
 
